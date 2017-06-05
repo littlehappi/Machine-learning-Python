@@ -1,0 +1,47 @@
+import numpy as np
+from matplotlib import  pyplot as plt
+
+def read_file(filename):
+    f=open(filename,'r')
+    stringArr=[line.strip().split(',') for line in f.readlines()]
+    dataArr=[]
+    for line in stringArr:
+        add=list(map(float,line[0:4]))
+        dataArr.append(add)
+    f.close()
+    return dataArr
+
+if __name__=='__main__':
+    data=read_file('data.txt')
+    data_num = len(data)
+    data_dimen= 4
+    new_=np.array(data)
+    meanval=np.zeros((data_dimen,1),dtype='float64')
+    mean_data=np.zeros((data_num,data_dimen),dtype='float64')
+    # 样本中心化
+    for i in range(data_dimen):
+        meanval[i]=np.mean(new_[:,i])
+
+    # print(meanval)
+    for i in range(data_num):
+        mean_data[i]=new_[i]-meanval.T
+
+    cov_=np.cov(mean_data,rowvar=0)
+    egiVals, eigVects=np.linalg.eig(np.mat(cov_))
+    # print(egiVals)
+    # print(eigVects)
+
+    eigValInd = np.argsort(egiVals)
+    eigValInd = eigValInd[: -(2 + 1): -1]
+    redEigVects = eigVects[:, eigValInd]
+    #
+    lowDDataMat = mean_data * redEigVects
+    # print(lowDDataMat)
+    reconMat = (lowDDataMat .dot(redEigVects.T) )
+    np.mean(data,axis=1)
+    plt.plot(reconMat[0:50, 0], reconMat[0:50, 1], 'bo')
+    plt.plot(reconMat[50:100, 0], reconMat[50:100, 1], 'go')
+    plt.plot(reconMat[100:150, 0], reconMat[100:150, 1], 'ro')
+    plt.show()
+# def zeroMean(dataMat):
+#     meanVal=np.mean(dataMat,axis=0)
